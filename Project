@@ -1,0 +1,171 @@
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <assert.h>
+#include <sys/time.h>
+#include <time.h>
+#define MAX_LENGTH 300
+clock_t start,finish;
+int k=0,d=0,add=1;
+int temp=0,AA=0;
+char str[MAX_LENGTH];
+char *check(char data[MAX_LENGTH], char answer[MAX_LENGTH]) {
+    static char clue[12];
+    char temp_A[5],temp_B[5];
+    int i;
+    int A = 0;
+    int ans_appear_times[10] = {0, 0, 0, 0, 0,
+                              0, 0, 0, 0, 0};
+    int data_appear_times[10] = {0, 0, 0, 0, 0,
+                               0, 0, 0, 0, 0};
+    //calculate A
+    for(i=0; i<MAX_LENGTH; i++) {
+        if(data[i] == answer[i]) {
+            A++;
+        }
+        else {
+            ans_appear_times[answer[i]-'0']++;
+            data_appear_times[data[i]-'0']++;
+        }
+    }
+  // calculate B
+    int B = 0;
+    for(i=0; i<10; i++) {
+        if(data_appear_times[i] >= ans_appear_times[i]) {
+            B += ans_appear_times[i];
+        }
+        else {
+            B += data_appear_times[i];
+        }
+    }
+    if(A==MAX_LENGTH && B==0)	{
+  	    return "Answer Correct!!";
+    }
+    sprintf(temp_A,"%d",A);  sprintf(temp_B,"%d",B);
+    strcat(temp_A,"A"); strcat(temp_B,"B"); strcat(temp_A,temp_B);  strcpy(clue,temp_A);
+    return clue;
+}
+char *guess(char *clue){
+
+    static char data[MAX_LENGTH];
+    int i=0;
+
+        if(k==0){
+
+            for(i=0;i<MAX_LENGTH;i++){
+                       str[i] = '0';
+            }
+
+            for(i=0; i<MAX_LENGTH; i++)
+                data[i] = str[i];
+            k++;
+            //printf("%s\n",data);
+            return data;
+        }
+
+        else if(k == 1){
+             AA = atoi(clue);
+             temp = AA;
+            //printf("[%d]%s\n",k,clue);
+
+            str[0] = '1';
+            for(i=1;i<MAX_LENGTH;i++){
+                       str[i] = '0';
+            }
+
+            for(i=0; i<MAX_LENGTH; i++)
+                data[i] = str[i];
+            k++;
+            //printf("%s\n",data);
+            return data;
+        }
+        
+    else if(k >= 2){
+        AA = atoi(clue);
+        //printf("[%d]%s\n",k,clue);
+
+            if ( AA == temp -1){
+
+                str[d] = '0';
+                k++;
+            }
+            else if (AA == temp+1){
+                     str[d] = data[d] ;
+                     str[d+1] = '1';
+                     d++;
+                     add =1;
+                     k++;
+            }
+            else if (AA == temp){
+                      add++;
+                      str[d] = add+48;
+                      k++;
+
+                    if(str[d]==9){
+                        d++;
+                       add=1;
+                    }
+                }
+
+        temp = AA;
+
+        for(i=0; i<MAX_LENGTH; i++) {
+            data[i] = str[i];
+        }
+        //printf("%s\n",data);
+        return data;
+
+    }
+}
+
+int main() {
+
+    char ans[MAX_LENGTH];
+    char str[MAX_LENGTH];
+    char get_back[MAX_LENGTH]="0A0B";   //initial input to guess function
+    srand(time(NULL));
+    struct timeval tval_before, tval_after, tval_result;
+
+    int i=0;
+    for(i=0; i<MAX_LENGTH; i++) {
+        ans[i] = rand()%10+'0';
+    }
+
+    //time start
+    i=1;
+    gettimeofday(&tval_before, NULL);
+    while(1){
+        //get_back is mean that the result of your guess
+  	    strcpy(get_back,check(guess(get_back), ans));
+
+        // you guessed right!!! Congratulation !!!
+        if(strcmp(get_back,"Answer Correct!!")==0)
+        {
+            printf("%s\n",get_back);
+            break;
+  	    }
+  	    gettimeofday(&tval_after, NULL);
+  	    long t = (tval_after.tv_sec*1e6 + tval_after.tv_usec) - (tval_before.tv_sec*1e6 + tval_before.tv_usec);
+  	    // convert to we can read
+        const int n = snprintf(NULL, 0, "%lu", t);
+        assert(n > 0);
+        char buf[n+1];
+        int c = snprintf(buf, n+1, "%lu", t);
+        assert(buf[n] == '\0');
+        assert(c == n);
+        //print time
+        /*int length = strlen(buf);
+        if(length>6) {
+            for(int i=0; i<length-6;i++){
+                printf("%c",buf[i]);
+            }
+            printf(",");
+            for(int i=length-6; i<length;i++) {
+                printf("%c",buf[i]);
+            }
+            printf("\n");
+        }*/
+        i++;
+    }
+    return 0;
+}
